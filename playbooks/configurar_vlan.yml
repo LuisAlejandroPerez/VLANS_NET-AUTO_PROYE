@@ -1,16 +1,56 @@
 ---
-- name: Configurar VLANs en el Switch
+- name: Configure VLANs and Interfaces on the Switch
   hosts: switches
   gather_facts: no
   tasks:
-    - name: Crear VLAN 10
+    - name: Create VLAN 10
       nxos_vlan:
         vlan_id: 10
-        name: "VLAN10"
+        name: "HRR"
         state: present
 
-    - name: Crear VLAN 20
+    - name: Create VLAN 20
       nxos_vlan:
         vlan_id: 20
-        name: "VLAN20"
+        name: "Reception"
         state: present
+
+    - name: Configure interfaces for VLAN 10
+      nxos_interfaces:
+        config:
+          - name: "Ethernet1/{{ item }}"
+            mode: layer2
+            enabled: true
+      loop:
+        - 2
+        - 3
+        - 4
+        - 5
+
+    - name: Assign VLAN 10 to interfaces
+      nxos_l2_interfaces:
+        config:
+          - name: "Ethernet1/{{ item }}"
+            mode: access
+            access:
+              vlan: 10
+      loop:
+        - 2
+        - 3
+        - 4
+        - 5
+
+    - name: Configure interface for VLAN 20
+      nxos_interfaces:
+        config:
+          - name: "Ethernet1/6"
+            mode: layer2
+            enabled: true
+
+    - name: Assign VLAN 20 to interface
+      nxos_l2_interfaces:
+        config:
+          - name: "Ethernet1/6"
+            mode: access
+            access:
+              vlan: 20
