@@ -1,0 +1,26 @@
+# Virtual Environment
+venv/
+env/
+
+# Python
+_pycache_/
+*.py[cod]
+*.so
+.Python
+*.pyc
+
+# IDE
+.vscode/
+.idea/
+
+# Test cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs
+*.log
+
+# Credentials
+credentials.yml
+secrets.yml

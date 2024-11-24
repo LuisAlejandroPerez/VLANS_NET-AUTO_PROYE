@@ -1,0 +1,16 @@
+---
+- name: Configurar VLANs en el Switch
+  hosts: switches
+  gather_facts: no
+  tasks:
+    - name: Crear VLAN 10
+      nxos_vlan:
+        vlan_id: 10
+        name: "VLAN10"
+        state: present
+
+    - name: Crear VLAN 20
+      nxos_vlan:
+        vlan_id: 20
+        name: "VLAN20"
+        state: present
