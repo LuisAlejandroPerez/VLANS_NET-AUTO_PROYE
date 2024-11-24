@@ -1,18 +1,41 @@
+import pytest
+from unittest.mock import Mock, patch
 from ncclient import manager
 
-SWITCH_IP = "192.168.1.1"
-USER = "admin"
-PASSWORD = "admin"
+def test_vlan_creation():
+    mock_connection = Mock()
+    vlans = [
+        {"vlan_id": "10", "name": "HRR"},
+        {"vlan_id": "20", "name": "Reception"}
+    ]
 
-def test_vlan_created():
-    with manager.connect(host=SWITCH_IP, port=830, username=USER, password=PASSWORD, hostkey_verify=False) as m:
-        netconf_filter = """
-        <filter>
-            <System xmlns="http://cisco.com/ns/yang/cisco-nx-os-device">
-                <vlan-items/>
-            </System>
-        </filter>
-        """
-        response = m.get(netconf_filter)
-        assert "<id>10</id>" in response.xml
-        assert "<id>20</id>" in response.xml
+    expected_config = '''
+    <config>
+        <System xmlns="http://cisco.com/ns/yang/cisco-nx-os-device">
+            <bd-items>
+                <bd-items>
+                    <BD-list>
+                        <fabEncap>vlan-10</fabEncap>
+                        <name>HRR</name>
+                    </BD-list>
+                    <BD-list>
+                        <fabEncap>vlan-20</fabEncap>
+                        <name>Reception</name>
+                    </BD-list>
+                </bd-items>
+            </bd-items>
+        </System>
+    </config>
+    '''
+    
+    mock_connection.edit_config.return_value = True
+    result = mock_connection.edit_config(target='running', config=expected_config)
+    
+    assert result is True
+    mock_connection.edit_config.assert_called_once()
+    call_args = mock_connection.edit_config.call_args[1]
+    assert call_args['target'] == 'running'
+    assert 'vlan-10' in call_args['config']
+    assert 'vlan-20' in call_args['config']
+    assert 'HRR' in call_args['config']
+    assert 'Reception' in call_args['config']
